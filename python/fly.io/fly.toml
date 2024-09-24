@@ -1,0 +1,35 @@
+app = 'python-agent-example'
+primary_region = 'iad'
+
+# As of now, the maximum kill_timeout on fly.io is 5 minutes. After
+# 5 minutes, in-progress AI voice conversations will be killed. This is limitation of
+# fly and we recommend that your app be able to gracefully handle this.
+# The easiest way to handle this is to create a new LiveKit room which will receive
+# a new agent.
+kill_timeout = "300s"
+
+[build]
+  dockerfile = "Dockerfile"
+  ignorefile = ".dockerignore"
+
+[env]
+  PYTHONUNBUFFERED = '1'
+
+[[vm]]
+  memory = '4gb'
+  cpu_kind = 'shared'
+  cpus = 2
+
+[deploy]
+  # We want to leave the previous deploy running to allow active conversations to drain
+  # so we use a bluegreen strategy. 
+  strategy = "bluegreen"
+
+# A check if required for the bluegreen deployment strategy.
+[[checks]]
+name = "healthcheck"
+type = "tcp"
+interval = "10s"
+timeout = "2s"
+grace_period = "5s"
+port = 8081  # Default health check port
