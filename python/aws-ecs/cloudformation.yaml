@@ -1,0 +1,88 @@
+Resources:
+  AgentVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+
+  AgentSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref AgentVPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: "us-east-1a"
+
+  AgentCluster:
+    Type: AWS::ECS::Cluster
+
+  DockerRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: python-agent-example
+
+  TaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ecsTaskExecutionRole  # You can name this role, or let CloudFormation name it
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: ECSSecretsAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                  - kms:Decrypt  # Include if you're using KMS-encrypted secrets
+                Resource:
+                  - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:ecs/python-agent-example/*"
+        - PolicyName: ECSTaskExecutionPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:BatchGetImage
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+
+  PythonAgentExampleTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: "2048"
+      Memory: "4096"
+      NetworkMode: awsvpc
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      ContainerDefinitions:
+        - Name: python-agent-example 
+          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${DockerRepository}:latest"
+          Essential: true
+          Secrets:
+            - name: LIVEKIT_URL
+              valueFrom: ecs/python-agent-example/livekit-url 
+            - name: LIVEKIT_API_KEY
+              valueFrom: ecs/python-agent-example/livekit-api-key
+            - name: LIVEKIT_API_SECRET
+              valueFrom: ecs/python-agent-example/livekit-api-secret
+
+  PythonAgentExampleService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: !Ref AgentCluster 
+      DesiredCount: 1
+      TaskDefinition: !Ref PythonAgentExampleTaskDefinition 
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets:
+            - !Ref AgentSubnet 
