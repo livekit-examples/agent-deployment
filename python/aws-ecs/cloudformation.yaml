@@ -11,6 +11,54 @@ Resources:
       CidrBlock: 10.0.1.0/24
       AvailabilityZone: "us-east-1a"
 
+  # The VPC needs to have access to the SSM service endpoint
+  # for fetching secrets
+  AgentSSMVpcEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ssm'
+      VpcId: !Ref AgentVPC
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref AgentSubnet
+      SecurityGroupIds:
+        - !Ref AgentVpcEndpointSecurityGroup
+
+  # Allow traffic from the VPC to the ECR service endpoints
+  ECRApiVpcEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecr.api'
+      VpcEndpointType: Interface
+      VpcId: !Ref AgentVPC
+      SubnetIds:
+        - !Ref AgentSubnet
+      SecurityGroupIds:
+        - !Ref AgentVpcEndpointSecurityGroup
+
+  ECRDkrVpcEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecr.dkr'
+      VpcEndpointType: Interface
+      VpcId: !Ref AgentVPC
+      SubnetIds:
+        - !Ref AgentSubnet
+      SecurityGroupIds:
+        - !Ref AgentVpcEndpointSecurityGroup 
+
+  AgentVpcEndpointSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow VPC Endpoint Communication
+      VpcId: !Ref AgentVPC
+      SecurityGroupIngress:
+        - IpProtocol: -1 
+          CidrIp: '10.0.0.0/16'  # Adjust CIDR block as needed
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: '0.0.0.0/0'
+
   AgentCluster:
     Type: AWS::ECS::Cluster
 
@@ -38,6 +86,9 @@ Resources:
               - Effect: Allow
                 Action:
                   - secretsmanager:GetSecretValue
+                  - ssm:GetParameters
+                  - ssm:GetParameter
+                  - ssm:DescribeParameters
                   - kms:Decrypt  # Include if you're using KMS-encrypted secrets
                 Resource:
                   - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:ecs/python-agent-example/*"
@@ -68,21 +119,23 @@ Resources:
           Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${DockerRepository}:latest"
           Essential: true
           Secrets:
-            - name: LIVEKIT_URL
-              valueFrom: ecs/python-agent-example/livekit-url 
-            - name: LIVEKIT_API_KEY
-              valueFrom: ecs/python-agent-example/livekit-api-key
-            - name: LIVEKIT_API_SECRET
-              valueFrom: ecs/python-agent-example/livekit-api-secret
+            - Name: LIVEKIT_URL
+              ValueFrom: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ecs/python-agent-example/livekit-url"
+            - Name: LIVEKIT_API_KEY
+              ValueFrom: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ecs/python-agent-example/livekit-api-key"
+            - Name: LIVEKIT_API_SECRET
+              ValueFrom: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ecs/python-agent-example/livekit-api-secret"
 
   PythonAgentExampleService:
     Type: AWS::ECS::Service
     Properties:
       Cluster: !Ref AgentCluster 
-      DesiredCount: 1
+      DesiredCount: 1 # Initially set to 0 because the image doesn't exist yet
       TaskDefinition: !Ref PythonAgentExampleTaskDefinition 
       LaunchType: FARGATE
       NetworkConfiguration:
         AwsvpcConfiguration:
           Subnets:
             - !Ref AgentSubnet 
+          SecurityGroups:
+            - !Ref AgentVpcEndpointSecurityGroup 

@@ -50,15 +50,22 @@ aws cloudformation create-stack \
   --template-body file://cloudformation.yaml \
   --capabilities CAPABILITY_NAMED_IAM
 ```
-Additional configuration for your specific agent should be done in the `cloudformation.yaml` file.
 
-After modifying the `cloudformation.yaml` file you can run
-```bash
-aws cloudformation update-stack \
-  --stack-name agents-stack \
-  --template-body file://cloudformation.yaml \
-  --capabilities CAPABILITY_NAMED_IAM
-```
+This will scaffold:
+- VPC + Subnet
+- ECS Cluster
+- ECR (Docker Repository)
+- ECS Task Definition with configuration for the python-agent-example
+- IAM Role for ECS Task Definition execution
+- ECS Service for the python-agent-example
+
+The `DesiredCount` set on the ECS Service is initially set to `0`. This is
+because there is a chicken-egg problem:
+- The Docker repository and `python-agent-example` docker image don't exist
+- The CloudFormation stack creation won't succeed until the service starts successfully
+- The Service depends on the Docker image
+
+In the next steps, we will build and push the Docker image and scale the Service.
 
 ### Login Docker to your Image Repository
 
@@ -79,4 +86,18 @@ docker build -t "<repository uri from above>":latest .
 
 ```bash
 docker push "<repository uri from above>":latest
+```
+
+### Scale the service
+
+Now that the image exists, we can scale the service. We'll start once instance
+by setting `DesiredCount: 1` in the `PythonAgentExampleService` of `cloudformation.yaml`.
+
+Once you make this change, run:
+
+```bash
+aws cloudformation update-stack \
+  --stack-name agents-stack \
+  --template-body file://cloudformation.yaml \
+  --capabilities CAPABILITY_NAMED_IAM
 ```
