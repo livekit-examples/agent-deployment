@@ -3,58 +3,87 @@ Resources:
     Type: AWS::EC2::VPC
     Properties:
       CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
 
-  AgentSubnet:
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref AgentVPC
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref AgentVPC
+      CidrBlock: 10.0.0.0/24
+      AvailabilityZone: "us-east-1a"
+      MapPublicIpOnLaunch: true
+
+  PrivateSubnet:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref AgentVPC
       CidrBlock: 10.0.1.0/24
       AvailabilityZone: "us-east-1a"
+      MapPublicIpOnLaunch: false
 
-  # The VPC needs to have access to the SSM service endpoint
-  # for fetching secrets
-  AgentSSMVpcEndpoint:
-    Type: AWS::EC2::VPCEndpoint
+  NATIPAddress:
+    Type: AWS::EC2::EIP
     Properties:
-      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ssm'
-      VpcId: !Ref AgentVPC
-      VpcEndpointType: Interface
-      SubnetIds:
-        - !Ref AgentSubnet
-      SecurityGroupIds:
-        - !Ref AgentVpcEndpointSecurityGroup
+      Domain: vpc
 
-  # Allow traffic from the VPC to the ECR service endpoints
-  ECRApiVpcEndpoint:
-    Type: AWS::EC2::VPCEndpoint
+  NATGateway:
+    Type: AWS::EC2::NatGateway
     Properties:
-      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecr.api'
-      VpcEndpointType: Interface
-      VpcId: !Ref AgentVPC
-      SubnetIds:
-        - !Ref AgentSubnet
-      SecurityGroupIds:
-        - !Ref AgentVpcEndpointSecurityGroup
+      AllocationId: !GetAtt NATIPAddress.AllocationId
+      SubnetId: !Ref PublicSubnet  # NAT Gateway in public subnet
 
-  ECRDkrVpcEndpoint:
-    Type: AWS::EC2::VPCEndpoint
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
     Properties:
-      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecr.dkr'
-      VpcEndpointType: Interface
       VpcId: !Ref AgentVPC
-      SubnetIds:
-        - !Ref AgentSubnet
-      SecurityGroupIds:
-        - !Ref AgentVpcEndpointSecurityGroup 
 
-  AgentVpcEndpointSecurityGroup:
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRouteTable
+
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref AgentVPC
+
+  PrivateRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATGateway
+
+  PrivateSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet
+      RouteTableId: !Ref PrivateRouteTable
+
+  SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Allow VPC Endpoint Communication
+      GroupDescription: Security group for ECS tasks
       VpcId: !Ref AgentVPC
-      SecurityGroupIngress:
-        - IpProtocol: -1 
-          CidrIp: '10.0.0.0/16'  # Adjust CIDR block as needed
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: '0.0.0.0/0'
@@ -79,31 +108,38 @@ Resources:
               Service: ecs-tasks.amazonaws.com
             Action: "sts:AssumeRole"
       Policies:
-        - PolicyName: ECSSecretsAccess
+        - PolicyName: ECSTaskExecutionAndSecretsPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
+                  # Permissions for AWS Secrets Manager and Systems Manager Parameter Store
                   - secretsmanager:GetSecretValue
                   - ssm:GetParameters
                   - ssm:GetParameter
                   - ssm:DescribeParameters
-                  - kms:Decrypt  # Include if you're using KMS-encrypted secrets
-                Resource:
-                  - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:ecs/python-agent-example/*"
-        - PolicyName: ECSTaskExecutionPolicy
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
+                  - kms:Decrypt  # Needed if secrets are encrypted with KMS
+
+                  # Permissions for pulling container images from Amazon ECR
+                  - ecr:GetAuthorizationToken
                   - ecr:GetDownloadUrlForLayer
                   - ecr:BatchCheckLayerAvailability
                   - ecr:BatchGetImage
+
+                  # Permissions for CloudWatch Logs
                   - logs:CreateLogStream
                   - logs:PutLogEvents
+
+                  # Permissions for accessing S3 (if needed)
+                  - s3:GetObject
                 Resource: "*"
+
+  PythonAgentExampleLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: "/ecs/python-agent-example"
+      RetentionInDays: 14  # Adjust retention as needed
 
   PythonAgentExampleTaskDefinition:
     Type: AWS::ECS::TaskDefinition
@@ -120,11 +156,17 @@ Resources:
           Essential: true
           Secrets:
             - Name: LIVEKIT_URL
-              ValueFrom: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ecs/python-agent-example/livekit-url"
+              ValueFrom: arn:aws:secretsmanager:us-east-1:203125320322:secret:ecs/python-agent-example/livekit-url-<unique-id>
             - Name: LIVEKIT_API_KEY
-              ValueFrom: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ecs/python-agent-example/livekit-api-key"
+              ValueFrom: arn:aws:secretsmanager:us-east-1:203125320322:secret:ecs/python-agent-example/livekit-api-key-<unique-id>
             - Name: LIVEKIT_API_SECRET
-              ValueFrom: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ecs/python-agent-example/livekit-api-secret"
+              ValueFrom: arn:aws:secretsmanager:us-east-1:203125320322:secret:ecs/python-agent-example/livekit-api-secret-<unique-id>
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref PythonAgentExampleLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: python-agent
 
   PythonAgentExampleService:
     Type: AWS::ECS::Service
@@ -136,6 +178,6 @@ Resources:
       NetworkConfiguration:
         AwsvpcConfiguration:
           Subnets:
-            - !Ref AgentSubnet 
+            - !Ref PrivateSubnet 
           SecurityGroups:
-            - !Ref AgentVpcEndpointSecurityGroup 
+            - !Ref SecurityGroup 

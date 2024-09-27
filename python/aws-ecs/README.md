@@ -36,8 +36,8 @@ aws secretsmanager create-secret \
   --secret-string "api-secret-from-livekit-cloud-dashboard"
 ```
 
-These secrets are referenced in the cloudformation configuration and will 
-be available as environment variables in the worker process. 
+Update the cloudformation.yaml with the arn from these created secrets.
+
 You will likely need to add additional secrets here as 
 well depending on your agent, for example, `OPENAI_API_KEY`.
 
@@ -81,12 +81,10 @@ aws ecr get-login-password --region us-east-1 | docker login --username AWS --pa
 ### Build and Push Docker Image
 
 ```bash
-docker build -t "<repository uri from above>":latest .
+docker buildx build --platform linux/amd64 -t "<repository uri from above>":<version> --push .
 ```
 
-```bash
-docker push "<repository uri from above>":latest
-```
+Update the image used in the `PythonAgentExampleService` section in `cloudformation.yaml`
 
 ### Scale the service
 
@@ -101,3 +99,11 @@ aws cloudformation update-stack \
   --template-body file://cloudformation.yaml \
   --capabilities CAPABILITY_NAMED_IAM
 ```
+
+### Updating a deployment
+
+```bash
+docker buildx build --platform linux/amd64 -t "<repository uri from above>":<new version> --push .
+```
+
+Then update the image in cloudformation and run the `update-stack` command again.
