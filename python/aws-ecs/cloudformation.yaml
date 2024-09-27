@@ -1,4 +1,5 @@
 Resources:
+  # Create a Virtual Private Cloud (VPC) for your ECS cluster
   AgentVPC:
     Type: AWS::EC2::VPC
     Properties:
@@ -6,15 +7,18 @@ Resources:
       EnableDnsSupport: true
       EnableDnsHostnames: true
 
+  # Create an Internet Gateway for internet access
   InternetGateway:
     Type: AWS::EC2::InternetGateway
 
+  # Attach the Internet Gateway to the VPC
   AttachGateway:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       VpcId: !Ref AgentVPC
       InternetGatewayId: !Ref InternetGateway
 
+  # Create a public subnet within the VPC
   PublicSubnet:
     Type: AWS::EC2::Subnet
     Properties:
@@ -23,6 +27,7 @@ Resources:
       AvailabilityZone: "us-east-1a"
       MapPublicIpOnLaunch: true
 
+  # Create a private subnet within the VPC
   PrivateSubnet:
     Type: AWS::EC2::Subnet
     Properties:
@@ -31,22 +36,26 @@ Resources:
       AvailabilityZone: "us-east-1a"
       MapPublicIpOnLaunch: false
 
+  # Allocate an Elastic IP address for the NAT Gateway
   NATIPAddress:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
 
+  # Create a NAT Gateway for internet access from the private subnet
   NATGateway:
     Type: AWS::EC2::NatGateway
     Properties:
       AllocationId: !GetAtt NATIPAddress.AllocationId
       SubnetId: !Ref PublicSubnet  # NAT Gateway in public subnet
 
+  # Create a route table for the public subnet
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref AgentVPC
 
+  # Add a default route to the Internet Gateway in the public route table
   PublicRoute:
     Type: AWS::EC2::Route
     DependsOn: AttachGateway
@@ -55,17 +64,20 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
 
+  # Associate the public subnet with the public route table
   PublicSubnetRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PublicSubnet
       RouteTableId: !Ref PublicRouteTable
 
+  # Create a route table for the private subnet
   PrivateRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref AgentVPC
 
+  # Add a default route to the NAT Gateway in the private route table
   PrivateRoute:
     Type: AWS::EC2::Route
     Properties:
@@ -73,12 +85,14 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NATGateway
 
+  # Associate the private subnet with the private route table
   PrivateSubnetRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PrivateSubnet
       RouteTableId: !Ref PrivateRouteTable
 
+  # Define a security group for ECS tasks
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -88,14 +102,17 @@ Resources:
         - IpProtocol: -1
           CidrIp: '0.0.0.0/0'
 
+  # Create an ECS cluster to run your tasks and services
   AgentCluster:
     Type: AWS::ECS::Cluster
 
+  # Create an Amazon ECR repository to store Docker images
   DockerRepository:
     Type: AWS::ECR::Repository
     Properties:
       RepositoryName: python-agent-example
 
+  # Define an IAM role for ECS task execution
   TaskExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -135,12 +152,14 @@ Resources:
                   - s3:GetObject
                 Resource: "*"
 
+  # Create a CloudWatch Logs log group for your ECS tasks
   PythonAgentExampleLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: "/ecs/python-agent-example"
       RetentionInDays: 14  # Adjust retention as needed
 
+  # Define an ECS task definition for your application
   PythonAgentExampleTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
@@ -152,7 +171,7 @@ Resources:
       ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
       ContainerDefinitions:
         - Name: python-agent-example 
-          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${DockerRepository}:latest"
+          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${DockerRepository}:<version>"
           Essential: true
           Secrets:
             - Name: LIVEKIT_URL
@@ -168,6 +187,7 @@ Resources:
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: python-agent
 
+  # Create an ECS service to run and maintain your tasks
   PythonAgentExampleService:
     Type: AWS::ECS::Service
     Properties:
