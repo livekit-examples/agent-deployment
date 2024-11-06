@@ -1,10 +1,20 @@
 # Fly.io LiveKit Agent Deployment Example
 
-This directory demonstrates how to deploy the `agent-example` to a fly.io environment. 
+This directory demonstrates how to deploy a LiveKit agent to fly.io. 
 
 Deployment configuration lives mostly in the `fly.toml` file. Documentation for chosen configuration can be found as comments in-line in that file.
 
 ## Getting Started
+
+### Copy Example App w/ Dockerfile 
+
+This guide assumes the app and relevant files exist in this directory. 
+We provide an example app in the `python-agent-implementation` directory at the top-level of this repo.
+
+```bash
+cp ../python-agent-example-app/* .
+cp ../python-agent-example-app/.dockerignore .
+```
 
 ### Install the `fly` command-line interface:
 
