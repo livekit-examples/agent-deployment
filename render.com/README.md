@@ -1,12 +1,8 @@
 # Render.com LiveKit Agent Deployment Example
 
-This directory demonstrates how to deploy the `agent-example` to a fly.io environment. 
+Render.com is setup is best configured in your (Render Dashboard)[https://dashboard.render.com]
 
-Deployment configuration lives mostly in the `fly.toml` file. Documentation for chosen configuration can be found as comments in-line in that file.
-
-## Getting Started
-
-### Create resources in Render Dashboard
+## Steps
 
 In your render dashboard:
 - Create a new project

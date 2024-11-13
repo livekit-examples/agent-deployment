@@ -15,10 +15,14 @@ spec:
       labels:
         app: agent-example 
     spec:
-      terminationGracePeriodSeconds: 600 # 10 minutes
+      # Give the agent 10 minutes to finish up any ongoing conversations
+      terminationGracePeriodSeconds: 600
+
       containers:
         - name: agent-example 
           image: your-docker-repo.com/path-to-your-docker-build:latest
+
+          # Good for ~30 concurrent 1:1 AI conversations
           resources:
             requests:
               cpu: "4"
@@ -26,6 +30,7 @@ spec:
             limits:
               cpu: "4"
               memory: "8Gi"
+
           env:
           - name: LIVEKIT_URL
             valueFrom:
