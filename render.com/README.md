@@ -6,24 +6,12 @@ Deployment configuration lives mostly in the `fly.toml` file. Documentation for 
 
 ## Getting Started
 
-### Copy Example App w/ Dockerfile 
+### Create resources in Render Dashboard
 
-This guide assumes the app and relevant files exist in this directory. 
-We provide an example app in the `python-agent-implementation` directory at the top-level of this repo.
-
-```bash
-cp ../python-agent-example-app/* .
-cp ../python-agent-example-app/.dockerignore .
-```
-
-### Create environment variables
-
-On your render.com dashboard, create an Environment Group called `AgentExampleEnvironmentGroup`.
-
-Add the following environment variables:
-
-```
-LIVEKIT_URL=wss://your-url-from-livekit-cloud-dashboard.livekit.cloud
-LIVEKIT_API_KEY="api-key-from-livekit-cloud-dashboard"
-LIVEKIT_API_SECRET="api-secret-from-livekit-cloud-dashboard"
-```
+In your render dashboard:
+- Create a new project
+- In that project create a new `Private Service`
+- Connect a GitHub provider and give it access to your repo
+- Set the root directory to `python-agent-example-app` (or if using your own repo, the directory containing the Dockerfile)
+- Add `LIVEKIT_URL`, `LIVEKIT_API_KEY`, and `LIVEKIT_API_SECRET` environment variables
+- Deploy the service

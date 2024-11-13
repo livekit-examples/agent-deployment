@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-example 
+  namespace: livekit
+  labels:
+    app: agent-example
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-example 
+  template:
+    metadata:
+      labels:
+        app: agent-example 
+    spec:
+      terminationGracePeriodSeconds: 600 # 10 minutes
+      containers:
+        - name: agent-example 
+          image: your-docker-repo.com/path-to-your-docker-build:latest
+          resources:
+            requests:
+              cpu: "4"
+              memory: "8Gi"
+            limits:
+              cpu: "4"
+              memory: "8Gi"
+          env:
+          - name: LIVEKIT_URL
+            valueFrom:
+              secretKeyRef:
+                name: agent-example-livekit 
+                key: LIVEKIT_URL 
+          - name: LIVEKIT_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: agent-example-livekit
+                key: LIVEKIT_API_KEY
+          - name: LIVEKIT_API_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: agent-example-livekit
+                key: LIVEKIT_API_SECRET
