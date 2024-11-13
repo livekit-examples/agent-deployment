@@ -110,7 +110,7 @@ Resources:
   DockerRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: python-agent-example
+      RepositoryName: agent-example
 
   # Define an IAM role for ECS task execution
   TaskExecutionRole:
@@ -153,14 +153,14 @@ Resources:
                 Resource: "*"
 
   # Create a CloudWatch Logs log group for your ECS tasks
-  PythonAgentExampleLogGroup:
+  AgentExampleLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: "/ecs/python-agent-example"
+      LogGroupName: "/ecs/agent-example"
       RetentionInDays: 14  # Adjust retention as needed
 
   # Define an ECS task definition for your application
-  PythonAgentExampleTaskDefinition:
+  AgentExampleTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
       RequiresCompatibilities:
@@ -170,30 +170,30 @@ Resources:
       NetworkMode: awsvpc
       ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
       ContainerDefinitions:
-        - Name: python-agent-example 
+        - Name: agent-example 
           Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${DockerRepository}:<version>"
           Essential: true
           Secrets:
             - Name: LIVEKIT_URL
-              ValueFrom: arn:aws:secretsmanager:us-east-1:203125320322:secret:ecs/python-agent-example/livekit-url-<unique-id>
+              ValueFrom: arn:aws:secretsmanager:us-east-1:203125320322:secret:ecs/agent-example/livekit-url-<unique-id>
             - Name: LIVEKIT_API_KEY
-              ValueFrom: arn:aws:secretsmanager:us-east-1:203125320322:secret:ecs/python-agent-example/livekit-api-key-<unique-id>
+              ValueFrom: arn:aws:secretsmanager:us-east-1:203125320322:secret:ecs/agent-example/livekit-api-key-<unique-id>
             - Name: LIVEKIT_API_SECRET
-              ValueFrom: arn:aws:secretsmanager:us-east-1:203125320322:secret:ecs/python-agent-example/livekit-api-secret-<unique-id>
+              ValueFrom: arn:aws:secretsmanager:us-east-1:203125320322:secret:ecs/agent-example/livekit-api-secret-<unique-id>
           LogConfiguration:
             LogDriver: awslogs
             Options:
-              awslogs-group: !Ref PythonAgentExampleLogGroup
+              awslogs-group: !Ref AgentExampleLogGroup
               awslogs-region: !Ref AWS::Region
-              awslogs-stream-prefix: python-agent
+              awslogs-stream-prefix: agent-example
 
   # Create an ECS service to run and maintain your tasks
-  PythonAgentExampleService:
+  AgentExampleService:
     Type: AWS::ECS::Service
     Properties:
       Cluster: !Ref AgentCluster 
       DesiredCount: 0 # Initially set to 0 because the image doesn't exist yet
-      TaskDefinition: !Ref PythonAgentExampleTaskDefinition 
+      TaskDefinition: !Ref AgentExampleTaskDefinition 
       LaunchType: FARGATE
       NetworkConfiguration:
         AwsvpcConfiguration:

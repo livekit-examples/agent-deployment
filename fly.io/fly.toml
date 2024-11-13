@@ -1,4 +1,4 @@
-app = 'python-agent-example'
+app = 'agent-example'
 primary_region = 'iad'
 
 # As of now, the maximum kill_timeout on fly.io is 5 minutes. After

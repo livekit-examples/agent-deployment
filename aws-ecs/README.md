@@ -1,12 +1,20 @@
 # AWS ECS Deployment Example
 
-This directory demonstrates how to deploy the `agent-example` to a fly.io environment. 
+This directory demonstrates how to deploy the `agent-example` to AWS ECS. 
 
-Deployment configuration lives mostly in the `fly.toml` file. Documentation for chosen configuration can be found as comments in-line in that file.
-
-The `scripts` directory contains scripts for the common deployment-lifecycle commands.
+Deployment configuration lives mostly in the `cloudformation.yaml` file. 
 
 ## Getting Started
+
+### Copy Example App w/ Dockerfile 
+
+This guide assumes the app and relevant files exist in this directory. 
+We provide an example app in the `agent-example-app` directory at the top-level of this repo.
+
+```bash
+cp ../agent-example-app/* .
+cp ../agent-example-app/.dockerignore .
+```
 
 ### Install dependencies:
 
@@ -22,17 +30,17 @@ There are a lot of ways to do this so we defer to the
 ### Create secrets
 ```bash
 aws secretsmanager create-secret \
-  --name ecs/python-agent-example/livekit-url \
+  --name ecs/agent-example/livekit-url \
   --region us-east-1 \
   --secret-string "wss://your-url-from-livekit-cloud-dashboard.livekit.cloud"
 
 aws secretsmanager create-secret \
-  --name ecs/python-agent-example/livekit-api-key \
+  --name ecs/agent-example/livekit-api-key \
   --region us-east-1 \
   --secret-string "api-key-from-livekit-cloud-dashboard"
 
 aws secretsmanager create-secret \
-  --name ecs/python-agent-example/livekit-api-secret \
+  --name ecs/agent-example/livekit-api-secret \
   --secret-string "api-secret-from-livekit-cloud-dashboard"
 ```
 
@@ -55,13 +63,13 @@ This will scaffold:
 - VPC + Subnet
 - ECS Cluster
 - ECR (Docker Repository)
-- ECS Task Definition with configuration for the python-agent-example
+- ECS Task Definition with configuration for the agent-example
 - IAM Role for ECS Task Definition execution
-- ECS Service for the python-agent-example
+- ECS Service for the agent-example
 
 The `DesiredCount` set on the ECS Service is initially set to `0`. This is
 because there is a chicken-egg problem:
-- The Docker repository and `python-agent-example` docker image don't exist
+- The Docker repository and `agent-example` docker image don't exist
 - The CloudFormation stack creation won't succeed until the service starts successfully
 - The Service depends on the Docker image
 
@@ -84,12 +92,12 @@ aws ecr get-login-password --region us-east-1 | docker login --username AWS --pa
 docker buildx build --platform linux/amd64 -t "<repository uri from above>":<version> --push .
 ```
 
-Update the image used in the `PythonAgentExampleService` section in `cloudformation.yaml`
+Update the image used in the `AgentExampleService` section in `cloudformation.yaml`
 
 ### Scale the service
 
 Now that the image exists, we can scale the service. We'll start once instance
-by setting `DesiredCount: 1` in the `PythonAgentExampleService` of `cloudformation.yaml`.
+by setting `DesiredCount: 1` in the `AgentExampleService` of `cloudformation.yaml`.
 
 Once you make this change, run:
 

@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-example 
+  namespace: livekit
+  labels:
+    app: agent-example
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-example 
+  template:
+    metadata:
+      labels:
+        app: agent-example 
+    spec:
+      # Give the agent 10 minutes to finish up any ongoing conversations
+      terminationGracePeriodSeconds: 600
+
+      containers:
+        - name: agent-example 
+          image: your-docker-repo.com/path-to-your-docker-build:latest
+
+          # Good for ~30 concurrent 1:1 AI conversations
+          resources:
+            requests:
+              cpu: "4"
+              memory: "8Gi"
+            limits:
+              cpu: "4"
+              memory: "8Gi"
+
+          env:
+          - name: LIVEKIT_URL
+            valueFrom:
+              secretKeyRef:
+                name: agent-example-livekit 
+                key: LIVEKIT_URL 
+          - name: LIVEKIT_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: agent-example-livekit
+                key: LIVEKIT_API_KEY
+          - name: LIVEKIT_API_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: agent-example-livekit
+                key: LIVEKIT_API_SECRET
