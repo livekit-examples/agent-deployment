@@ -1,0 +1,29 @@
+services:
+- type: pserv
+  repo: https://github.com/livekit-examples/agent-deployment
+
+  # Change this to the path containing your Dockerfile
+  rootDir: python-agent-example-app
+
+  name: agent-example
+  runtime: image
+
+  # Free plan is not available for private services
+  plan: starter
+
+  # Environment variables are stored in a group
+  # created in the Render dashboard.
+  envVars:
+  - fromGroup: agent-example-env 
+  region: virginia
+
+  # 300s is the standard allowed maximum. Talk to render.com support if you need this increased.
+  maxShutdownDelaySeconds: 300
+
+  # Sane defaults
+  scaling:
+    minInstances: 1
+    maxInstances: 4
+    targetCPUPercent: 60
+    targetMemoryPercent: 60
+version: "1"
