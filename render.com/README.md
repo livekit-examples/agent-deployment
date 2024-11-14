@@ -8,7 +8,7 @@ Deployment configuration lives mostly in the `render.yaml` file. Documentation f
 
 ### Create environment group
 
-In your (Render.com dashboard)[dashboard.render.com] you'll need to create an environment group to store LiveKit secrets.
+In your [Render.com dashboard](https://dashboard.render.com) you'll need to create an environment group to store LiveKit secrets.
 Create an environment group with the name `agent-example-env-group` with the variables:
 ```bash
 LIVEKIT_URL=wss://your-livekit-url.livekit.cloud
