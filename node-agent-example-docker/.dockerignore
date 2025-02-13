@@ -1,6 +1,13 @@
-# Python artifacts
-venv/
-__pycache__/
+# Node.js dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Build outputs
+dist
+build
+coverage
 
 # Local environment & config files
 .env
