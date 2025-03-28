@@ -1,20 +1,11 @@
-# Fly.io LiveKit Agent Deployment Example
+# Fly.io LiveKit Agents Deployment Example
 
-This directory demonstrates how to deploy a LiveKit agent to fly.io. 
+This directory demonstrates how to deploy LiveKit Agents to [fly.io](https://fly.io) using a sample `fly.toml` file.
 
-Deployment configuration lives mostly in the `fly.toml` file. Documentation for chosen configuration can be found as comments in-line in that file.
+You also need a working agents app and Dockerfile. See the examples for [Python](/python-agent-example-app) or [Node.js](/node-agent-example-docker) if necessary.
+
 
 ## Getting Started
-
-### Copy Example App w/ Dockerfile 
-
-This guide assumes the app and relevant files exist in this directory. 
-We provide an example app in the `python-agent-implementation` directory at the top-level of this repo.
-
-```bash
-cp ../python-agent-example-app/* .
-cp ../python-agent-example-app/.dockerignore .
-```
 
 ### Install the `fly` command-line interface:
 
@@ -26,14 +17,24 @@ https://fly.io/docs/flyctl/install/
 fly auth login
 ```
 
+### Copy the sample `fly.toml` file
+
+Copy the `fly.toml` file to the root of your project (wherever your `Dockerfile` is located).
+
 ### Create your app
+
+Now you can create your app, and use the `fly.toml` you already have. You may change the name if you'd like, both in the file and in the command below.
+
 ```bash
-fly app create python-agent-example
+fly app create agent-example
 ```
 
 ### Create secrets
+
+You will need to create secrets for your app. You can do this using the `fly secrets` command.
+
 ```bash
-fly secrets set --app python-agent-example \
+fly secrets set --app agent-example \
 LIVEKIT_URL="wss://your-url-from-livekit-cloud-dashboard.livekit.cloud" \
 LIVEKIT_API_KEY="api-key-from-livekit-cloud-dashboard" \
 LIVEKIT_API_SECRET="api-secret-from-livekit-cloud-dashboard"
@@ -42,6 +43,7 @@ LIVEKIT_API_SECRET="api-secret-from-livekit-cloud-dashboard"
 These secrets will be available as environment variables in the worker process. You will likely need to add additional secrets here as well depending on your agent, for example, `OPENAI_API_KEY`.
 
 ### Deploy your app
+
 ```bash
 fly deploy -c fly.toml 
 ```
@@ -51,7 +53,7 @@ fly deploy -c fly.toml
 Scaling can be done manually using fly commands:
 
 ```bash
-fly scale count --app python-agent-example
+fly scale count --app agent-example
 ```
 
-For autoscaling on fly, we defer to their guide: https://fly.io/docs/launch/autoscale-by-metric/
+For autoscaling on fly, see their guide: https://fly.io/docs/launch/autoscale-by-metric/

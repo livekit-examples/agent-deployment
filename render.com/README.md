@@ -1,10 +1,14 @@
-# Render.com LiveKit Agent Deployment Example
+# Render.com LiveKit Agents Deployment Example
 
-This directory demonstrates how to deploy a LiveKit agent to Render.com. 
+This directory demonstrates how to deploy LiveKit Agents to [Render.com](https://render.com).
 
-Deployment configuration lives mostly in the `render.yaml` file. Documentation for chosen configuration can be found as comments in-line in that file.
+You also need a working agents app and Dockerfile. See the examples for [Python](/python-agent-example-app) or [Node.js](/node-agent-example-docker) if necessary.
 
 ## Getting Started
+
+### Copy the `render.yaml` file
+
+Copy the `render.yaml` file to the root of your project (wherever your `Dockerfile` is located).
 
 ### Create environment group
 

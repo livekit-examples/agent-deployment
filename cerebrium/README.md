@@ -1,14 +1,14 @@
-# Cerebrium.ai LiveKit Agent Deployment Example
+# Cerebrium.ai LiveKit Agents Deployment Example
 
-This directory demonstrates how to deploy a LiveKit agent to [Cerebrium](https://www.cerebrium.ai)
+This directory demonstrates how to deploy LiveKit Agents to [Cerebrium](https://www.cerebrium.ai) using a sample  `cerebrium.toml` file.
 
-Deployment configuration lives mostly in the `cerebrium.toml` file. Documentation for chosen configuration can be found as comments in-line in that file.
+You also need a working agents app and Dockerfile. See the examples for [Python](/python-agent-example-app) or [Node.js](/node-agent-example-docker) if necessary.
 
 ## Getting Started
 
 ### Create Cerebrium account
 
-If you don’t have a Cerebrium account, you can run the following in your cli:
+If you don't have a Cerebrium account, you can easily signup with the CLI:
 
 ```bash
 pip install cerebrium --upgrade
@@ -24,6 +24,10 @@ LIVEKIT_API_KEY=your-livekit-api-key
 LIVEKIT_API_SECRET=your-livekit-api-secret
 ```
 
+### Add your cerebrium.toml file
+
+Copy the `cerebrium.toml` file to the root of your project (wherever your `Dockerfile` is located).
+
 ### Launch your service
 
 Run the following in your CLI to launch the service
@@ -32,5 +36,4 @@ Run the following in your CLI to launch the service
 cerebrium deploy
 ```
 
-Make sure you run this command with the cerebrium.toml in the same folder as the python-agent-example-app.
 If you need further help extending functionality you can look in the documentation [here](https://docs.cerebrium.ai/cerebrium/getting-started/introduction).
