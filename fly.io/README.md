@@ -23,7 +23,7 @@ Copy the `fly.toml` file to the root of your project (wherever your `Dockerfile`
 
 ### Create your app
 
-Now you can create your app, and use the `fly.toml` you already have. You may change the name if you'd like, both in the file and in the command below.
+Create your app, and use the `fly.toml` file you already have. You can change the name if you'd like, both in the file and in the command below.
 
 ```bash
 fly app create agent-example
