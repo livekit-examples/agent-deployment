@@ -23,6 +23,7 @@ The following examples include a template configuration or manifest file for eac
 | [Cerebrium](/cerebrium) | `cerebrium.toml` example for [Cerebrium](https://cerebrium.ai) |
 | [Fly.io](/fly.io) | `fly.toml` example for [Fly.io](https://fly.io) |
 | [Kubernetes](/kubernetes) | Example manifest file for any Kubernetes environment |
+| [Modal](/modal) | Example based on the python-agent-starter project ready to deploy on [Modal](https://modal.com) (no `Dockerfile` or config file necessary) |
 | [Render](/render.com) | `render.yaml` example for [Render](https://render.com) |
 
 ## Missing a provider?
