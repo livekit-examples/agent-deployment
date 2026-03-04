@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-auto">
+      <path d="M 0 1 L 10 5 L 0 9" fill="none" stroke="#64748b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <linearGradient id="awsGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fff7ed"/>
+      <stop offset="100%" stop-color="#ffedd5"/>
+    </linearGradient>
+    <linearGradient id="turnGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f0fdf4"/>
+      <stop offset="100%" stop-color="#dcfce7"/>
+    </linearGradient>
+    <linearGradient id="lkGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#eff6ff"/>
+      <stop offset="100%" stop-color="#dbeafe"/>
+    </linearGradient>
+    <linearGradient id="userGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#faf5ff"/>
+      <stop offset="100%" stop-color="#f3e8ff"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="340" rx="12" fill="#fafafa"/>
+
+  <!-- Title -->
+  <text x="450" y="32" text-anchor="middle" font-size="15" font-weight="600" fill="#1e293b" letter-spacing="0.5">LiveKit Agent on Amazon Bedrock AgentCore Runtime</text>
+
+  <!-- AgentCore box -->
+  <rect x="30" y="60" width="220" height="230" rx="10" fill="url(#awsGrad)" stroke="#f97316" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="140" y="84" text-anchor="middle" font-size="11" font-weight="700" fill="#c2410c" letter-spacing="0.8">AGENTCORE RUNTIME</text>
+  <text x="140" y="98" text-anchor="middle" font-size="9" fill="#9a3412">(VPC · Private Subnets)</text>
+
+  <!-- Agent container -->
+  <rect x="55" y="115" width="170" height="70" rx="8" fill="white" stroke="#ea580c" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="140" y="138" text-anchor="middle" font-size="11" font-weight="600" fill="#1e293b">Agent Container</text>
+  <text x="140" y="154" text-anchor="middle" font-size="9.5" fill="#64748b">livekit-agents</text>
+  <text x="140" y="168" text-anchor="middle" font-size="9" fill="#94a3b8">ARM64 · Port 8080</text>
+
+  <!-- NAT Gateway -->
+  <rect x="65" y="205" width="150" height="40" rx="6" fill="white" stroke="#ea580c" stroke-width="1"/>
+  <text x="140" y="222" text-anchor="middle" font-size="10" fill="#9a3412">NAT Gateway</text>
+  <text x="140" y="235" text-anchor="middle" font-size="8.5" fill="#94a3b8">→ Internet Gateway</text>
+
+  <!-- Arrow: Agent → NAT -->
+  <line x1="140" y1="185" x2="140" y2="205" stroke="#64748b" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- TURN box -->
+  <rect x="340" y="108" width="200" height="130" rx="10" fill="url(#turnGrad)" stroke="#22c55e" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="440" y="132" text-anchor="middle" font-size="11" font-weight="700" fill="#15803d" letter-spacing="0.5">TURN SERVER</text>
+
+  <!-- KVS option -->
+  <rect x="358" y="145" width="164" height="32" rx="5" fill="white" stroke="#16a34a" stroke-width="0.8"/>
+  <text x="440" y="160" text-anchor="middle" font-size="9.5" font-weight="600" fill="#15803d">★ KVS Managed TURN</text>
+  <text x="440" y="171" text-anchor="middle" font-size="8" fill="#64748b">AWS-native · Auto-rotating creds</text>
+
+  <!-- Third-party option -->
+  <rect x="358" y="185" width="164" height="32" rx="5" fill="white" stroke="#86efac" stroke-width="0.8"/>
+  <text x="440" y="200" text-anchor="middle" font-size="9.5" fill="#4b5563">Third-party TURN</text>
+  <text x="440" y="211" text-anchor="middle" font-size="8" fill="#94a3b8">Cloudflare · Twilio · metered.ca</text>
+
+  <!-- OR label -->
+  <text x="355" y="197" text-anchor="middle" font-size="8" fill="#94a3b8" font-style="italic">or</text>
+
+  <!-- LiveKit box -->
+  <rect x="630" y="108" width="170" height="130" rx="10" fill="url(#lkGrad)" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="715" y="132" text-anchor="middle" font-size="11" font-weight="700" fill="#1d4ed8" letter-spacing="0.5">LIVEKIT</text>
+  <text x="715" y="146" text-anchor="middle" font-size="9" fill="#3b82f6">Cloud or Self-hosted</text>
+
+  <!-- Room icon area -->
+  <rect x="655" y="160" width="120" height="55" rx="6" fill="white" stroke="#93c5fd" stroke-width="0.8"/>
+  <text x="715" y="178" text-anchor="middle" font-size="10" fill="#1e293b">Room</text>
+  <text x="715" y="192" text-anchor="middle" font-size="9" fill="#64748b">Agent + Users</text>
+  <text x="715" y="204" text-anchor="middle" font-size="8.5" fill="#94a3b8">WebRTC media</text>
+
+  <!-- Users -->
+  <rect x="660" y="260" width="110" height="45" rx="8" fill="url(#userGrad)" stroke="#a855f7" stroke-width="1.2" filter="url(#shadow)"/>
+  <text x="715" y="280" text-anchor="middle" font-size="10" font-weight="600" fill="#7e22ce">Users</text>
+  <text x="715" y="293" text-anchor="middle" font-size="8.5" fill="#94a3b8">Browser · Mobile · SDK</text>
+
+  <!-- Arrows -->
+  <!-- Agent → TURN -->
+  <line x1="250" y1="172" x2="340" y2="172" stroke="#64748b" stroke-width="1.3" marker-end="url(#arrow)"/>
+  <text x="295" y="164" text-anchor="middle" font-size="8" fill="#94a3b8">UDP/TCP</text>
+
+  <!-- TURN → LiveKit -->
+  <line x1="540" y1="172" x2="630" y2="172" stroke="#64748b" stroke-width="1.3" marker-end="url(#arrow)"/>
+  <text x="585" y="164" text-anchor="middle" font-size="8" fill="#94a3b8">media relay</text>
+
+  <!-- Users → LiveKit -->
+  <line x1="715" y1="260" x2="715" y2="238" stroke="#64748b" stroke-width="1.3" marker-end="url(#arrow)"/>
+
+  <!-- Legend -->
+  <rect x="30" y="308" width="8" height="8" rx="2" fill="#ffedd5" stroke="#f97316" stroke-width="0.8"/>
+  <text x="44" y="316" font-size="8.5" fill="#64748b">AWS (your account)</text>
+  <rect x="160" y="308" width="8" height="8" rx="2" fill="#dcfce7" stroke="#22c55e" stroke-width="0.8"/>
+  <text x="174" y="316" font-size="8.5" fill="#64748b">TURN relay</text>
+  <rect x="260" y="308" width="8" height="8" rx="2" fill="#dbeafe" stroke="#3b82f6" stroke-width="0.8"/>
+  <text x="274" y="316" font-size="8.5" fill="#64748b">LiveKit</text>
+  <rect x="340" y="308" width="8" height="8" rx="2" fill="#f3e8ff" stroke="#a855f7" stroke-width="0.8"/>
+  <text x="354" y="316" font-size="8.5" fill="#64748b">End users</text>
+  <text x="450" y="316" font-size="8.5" fill="#94a3b8">★ = recommended</text>
+</svg>
