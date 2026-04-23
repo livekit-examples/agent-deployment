@@ -2,13 +2,13 @@
 
 This repository contains a collection of examples to deploy [LiveKit Agents](https://github.com/livekit/agents) into a production environment for a variety of cloud providers.
 
-For more information about deployment, see the [documentation](https://docs.livekit.io/agents/deployment)
+For more information about deployment, see the [documentation](https://docs.livekit.io/deploy/agents/).
 
 ## LiveKit Cloud
 
-The easiest way to deploy an agent is with [LiveKit Cloud Agents](https://docs.livekit.io/agents/ops/deployment/cloud/), a fully-managed hosting service built specifically for LiveKit Agents. It handles scaling, observability, and rollouts for you, so you can ship an agent without managing your own infrastructure.
+The easiest way to deploy an agent is to [deploy it to LiveKit Cloud](https://docs.livekit.io/deploy/agents/). LiveKit Cloud runs your agent on LiveKit's global network and infrastructure, with automatic scaling and load balancing, secrets management, and built-in metrics and log forwarding. Deployments are driven by a single LiveKit CLI command and use your existing Dockerfile.
 
-See the [LiveKit Cloud Agents documentation](https://docs.livekit.io/agents/ops/deployment/cloud/) to get started.
+See the [agent deployment quickstart](https://docs.livekit.io/deploy/agents/quickstart/) to get started.
 
 ## Dockerfile examples
 
