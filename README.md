@@ -1,13 +1,9 @@
 # LiveKit Agents deployment examples
 
 > [!WARNING]
-> **This repository is deprecated and unmaintained as of 2026.**
+> **These examples are deprecated and unmaintained as of 2026. They may be out of date.**
 >
-> It will be archived to read-only shortly after this notice is posted. The examples here are no longer being updated and may be out of date.
->
-> For current deployment guidance, please refer to the official documentation:
-> - **General deployment advice (including LiveKit Cloud):** https://docs.livekit.io/deploy/agents/
-> - **Self-hosted deployment:** https://docs.livekit.io/deploy/custom/deployments/
+> For current LiveKit Agents deployment guidance, refer to the [official documentation](https://docs.livekit.io/deploy/agents/).
 
 This repository contains a collection of examples to deploy [LiveKit Agents](https://github.com/livekit/agents) into a production environment for a variety of cloud providers.
 
