@@ -1,0 +1,4 @@
+livekit-agents[silero]~=1.4
+livekit-plugins-aws~=1.4
+python-dotenv
+boto3
